@@ -9,12 +9,12 @@ import java.time.LocalDate;
  *
  * @author Daniel Servejeira
  */
-public class User {
+public class Holder {
     private String name;
     private LocalDate birthDate;
     private String cpf;
 
-    public User(String name, LocalDate birthDate, String cpf) {
+    public Holder(String name, LocalDate birthDate, String cpf) {
         this.name = name;
         this.birthDate = birthDate;
         this.cpf = cpf;
@@ -44,5 +44,8 @@ public class User {
         this.cpf = cpf;
     }
     
-    
+    @Override
+    public String toString() {
+        return String.format("Nome: %s\nCPF: %s\nNascimento: %s", name, cpf, birthDate);
+    }
 }
