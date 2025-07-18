@@ -3,21 +3,25 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package pix.transfer;
+
 import java.time.LocalDate;
+import java.util.ArrayList;
 
 /**
  *
  * @author Daniel Servejeira
  */
 public class Holder {
+    private String cpf;
     private String name;
     private LocalDate birthDate;
-    private String cpf;
+    private final ArrayList<BankAccount> bankAccounts;
 
-    public Holder(String name, LocalDate birthDate, String cpf) {
+    public Holder(String cpf, String name, LocalDate birthDate) {
         this.name = name;
         this.birthDate = birthDate;
         this.cpf = cpf;
+        this.bankAccounts = new ArrayList<>();
     }
 
     public String getName() {
@@ -43,9 +47,16 @@ public class Holder {
     public void setCpf(String cpf) {
         this.cpf = cpf;
     }
-    
-    @Override
-    public String toString() {
-        return String.format("Nome: %s\nCPF: %s\nNascimento: %s", name, cpf, birthDate);
+
+    public ArrayList<BankAccount> getBankAccounts() {
+        return bankAccounts;
+    }
+
+    public void addAgency(BankAccount bankAccount) {
+        bankAccounts.add(bankAccount);
+    }
+
+    public void removeAgency(BankAccount bankAccount) {
+        bankAccounts.remove(bankAccount);
     }
 }

@@ -4,58 +4,159 @@
  */
 package pix.transfer;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.io.FileWriter;
+import java.util.*;
+import java.time.LocalDate;
 
 /**
  *
  * @author Daniel Servejeira
  */
 public class Controller {
-    private BankAccount sourceAccount;
-    private Bank bank;
+    private final static ArrayList<Holder> holders = new ArrayList<>();
+    private final static ArrayList<Bank> banks = new ArrayList<>();
+    
+    public static void initialize() {
+        Bank bank = new Bank("Banco do Brasil");
 
-    public Controller(BankAccount sourceAccount, Bank bank) {
-        this.sourceAccount = sourceAccount;
-        this.bank = bank;
+        Agency agency = new Agency("0001");
+
+        Holder holder = new Holder("12345678900", "João da Silva", LocalDate.of(1990, 5, 22));
+
+        BankAccount bankAccount = new BankAccount("10001", "joao@mail.com");
+
+        agency.getBankAccounts().add(bankAccount);
+        holder.getBankAccounts().add(bankAccount);
+
+        bank.getAgencies().add(agency);
+
+        banks.add(bank);
+        holders.add(holder);
+    }
+    
+    public static void credit(BankAccount account, BigDecimal amount) {
+        BigDecimal newBalance = account.getBalance().add(amount);
+        account.setBalance(newBalance);
     }
 
-    public boolean transfer(String pixKeyDestination, BigDecimal amount) {
-        BankAccount destination = bank.findByPixKey(pixKeyDestination);
-
-        if (destination == null) {
-            System.out.println("Chave PIX não encontrada.");
-            return false;
+    public static void debit(BankAccount account, BigDecimal amount) {
+        BigDecimal newBalance = account.getBalance().subtract(amount);
+        account.setBalance(newBalance);
+    }
+    
+    public static List<Holder> getHolders() {
+        return holders;
+    }
+    
+    public static List<Bank> getBanks() {
+        return banks;
+    }
+    
+    public static Bank getBankByAgency(Agency agency) {
+        for (Bank bank : banks) {
+            if (bank.getAgencies().contains(agency)) {
+                return bank;
+            }
         }
-
-        if (!sourceAccount.debit(amount)) {
-            System.out.println("Saldo insuficiente.");
-            return false;
-        }
-
-        destination.credit(amount);
-        logTransaction(destination, amount);
-        return true;
+        return null;
+    }
+    
+    public static List<Agency> getAgencies(Bank bank) {
+        return bank.getAgencies();
+    }
+    
+    public static List<BankAccount> getBankAccountsByAgency(Agency agency) {
+        return agency.getBankAccounts();
+    }
+    
+    public static List<BankAccount> getBankAccountsByHolder(Holder holder) {
+        return holder.getBankAccounts();
+    }
+    
+    public static void addBank(Bank bank) {
+        banks.add(bank);
     }
 
-    private void logTransaction(BankAccount destination, BigDecimal amount) {
-        String log = String.format(
-            "[%s] Transferência de R$ %s de %s para %s\n",
-            LocalDateTime.now(),
-            amount.toPlainString(),
-            sourceAccount.getPixKey(),
-            destination.getPixKey()
-        );
-        
-        System.out.println("\n=== LOG DE TRANSFERÊNCIA ===");
-        System.out.println(log);
+    public static void removeBank(Bank bank) {
+        banks.remove(bank);
+    }
+    
+    public static void addAgency(Agency agency, Bank bank) {
+        bank.addAgency(agency);
     }
 
-    public BankAccount getSourceAccount() {
-        return sourceAccount;
+    public static void removeAgency(Agency agency, Bank bank) {
+        bank.removeAgency(agency);
+    }
+    
+    public static void addBankAccount(BankAccount bankAccount, Agency agency) {
+        agency.addAccount(bankAccount);
     }
 
-    public BankAccount getDestinationAccount(String pixKey) {
-        return bank.findByPixKey(pixKey);
+    public static void removeBankAccount(BankAccount bankAccount, Agency agency) {
+        agency.removeAccount(bankAccount);
+    }
+    
+    public static void addHolder(Holder holder) {
+        holders.add(holder);
+    }
+    
+    public static void removeBank(Holder holder) {
+        holders.remove(holder);
+    }
+    
+    public static BigDecimal getBalance(BankAccount bankAccount) {
+        return bankAccount.getBalance();
+    }
+    
+    public static String getPixKey(BankAccount bankAccount) {
+        return bankAccount.getPixKey();
+    }
+    
+    public static String getBankAccountNumber(BankAccount bankAccount) {
+        return bankAccount.getNumber();
+    }
+    
+    public static String getHolderName(Holder holder) {
+        return holder.getName();
+    }
+    
+    public static String getHolderCpf(Holder holder) {
+        return holder.getCpf();
+    }
+    
+    public static boolean bankAccountsIsEmpty(List bankAccounts) {
+        return bankAccounts.isEmpty();
+    }
+    
+    public static boolean banksIsEmpty(List banks) {
+        return banks.isEmpty();
+    }
+    
+    public static boolean agenciesIsEmpty(List agencies) {
+        return agencies.isEmpty();
+    }
+    
+    public static String getBankName(Bank bank) {
+        return bank.getName();
+    }
+    
+    public static String getAgencyNumber(Agency agency) {
+        return agency.getNumber();
+    }
+    
+    public static int getBankAccountSize(List bankAccounts) {
+        return bankAccounts.size();
+    }
+    
+    public static int getBankSize(List banks) {
+        return banks.size();
+    }
+    
+    public static int getAgencySize(List agencies) {
+        return agencies.size();
+    }
+    
+    public static int getHolderSize(List holders) {
+        return holders.size();
     }
 }

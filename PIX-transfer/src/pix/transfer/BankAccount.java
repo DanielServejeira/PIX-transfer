@@ -10,17 +10,13 @@ import java.math.BigDecimal;
  * @author Daniel Servejeira
  */
 public class BankAccount {
-    private String number;
-    private Holder holder;
+    private final String number;
     private BigDecimal balance;
-    private String agency;
     private String pixKey;
     
-    public BankAccount(String number, Holder holder, String agency, String pixKey) {
+    public BankAccount(String number, String pixKey) {
         this.number = number;
-        this.holder = holder;
         balance = new BigDecimal("0.00");
-        this.agency = agency;
         this.pixKey = pixKey;
     }
 
@@ -28,32 +24,12 @@ public class BankAccount {
         return number;
     }
 
-    public void setNumber(String number) {
-        this.number = number;
-    }
-
-    public Holder getHolder() {
-        return holder;
-    }
-
-    public void setHolder(Holder holder) {
-        this.holder = holder;
-    }
-
     public BigDecimal getBalance() {
         return balance;
     }
-
+    
     public void setBalance(BigDecimal balance) {
         this.balance = balance;
-    }
-
-    public String getAgency() {
-        return agency;
-    }
-
-    public void setAgency(String agency) {
-        this.agency = agency;
     }
 
     public String getPixKey() {
@@ -74,13 +50,5 @@ public class BankAccount {
     
     public void credit(BigDecimal amount) {
         balance = balance.add(amount);
-    }
-    
-    @Override
-    public String toString() {
-        return String.format(
-            "Titular: %s\nConta: %s\nAgência: %s\nChave PIX: %s\nSaldo: R$ %s",
-            holder.getName(), number, agency, pixKey, balance.toPlainString()
-        );
     }
 }

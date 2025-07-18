@@ -1,0 +1,44 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package pix.transfer;
+
+import java.util.ArrayList;
+
+/**
+ *
+ * @author Daniel Servejeira
+ */
+public class Agency {
+    private final String number;
+    private final ArrayList<BankAccount> bankAccounts;
+
+    public Agency(String number) {
+        this.number = number;
+        this.bankAccounts = new ArrayList<>();
+    }
+
+    public String getNumber() {
+        return number;
+    }
+
+    public ArrayList<BankAccount> getBankAccounts() {
+        return bankAccounts;
+    }
+    
+    public void addAccount(BankAccount account) {
+        bankAccounts.add(account);
+    }
+    
+    public void removeAccount(BankAccount account) {
+        bankAccounts.remove(account);
+    }
+
+    public BankAccount findByPixKey(String pixKey) {
+        return bankAccounts.stream()
+                .filter(acc -> acc.getPixKey().equals(pixKey))
+                .findFirst()
+                .orElse(null);
+    }
+}

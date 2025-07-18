@@ -11,13 +11,11 @@ import java.util.ArrayList;
  */
 public class Bank {
     private String name;
-    private ArrayList<Integer> agencies;
-    private ArrayList<BankAccount> bankAccounts;
+    private final ArrayList<Agency> agencies;
 
     public Bank(String name) {
         this.name = name;
         this.agencies = new ArrayList<>();
-        this.bankAccounts = new ArrayList<>();
     }
 
     public String getName() {
@@ -28,42 +26,15 @@ public class Bank {
         this.name = name;
     }
 
-    public ArrayList<Integer> getAgencies() {
+    public ArrayList<Agency> getAgencies() {
         return agencies;
     }
-
-    public void setAgencies(ArrayList<Integer> agencies) {
-        this.agencies = agencies;
-    }
-
-    public ArrayList<BankAccount> getBankAccounts() {
-        return bankAccounts;
-    }
-
-    public void setBankAccounts(ArrayList<BankAccount> bankAccounts) {
-        this.bankAccounts = bankAccounts;
-    }
     
-    public void addAgency(int agency) {
+    public void addAgency(Agency agency) {
         agencies.add(agency);
     }
 
-    public void removeAgency(int agency) {
+    public void removeAgency(Agency agency) {
         agencies.remove(agency);
-    }
-    
-    public void addAccount(BankAccount account) {
-        bankAccounts.add(account);
-    }
-    
-    public void removeAccount(BankAccount account) {
-        bankAccounts.remove(account);
-    }
-
-    public BankAccount findByPixKey(String pixKey) {
-        return bankAccounts.stream()
-                .filter(acc -> acc.getPixKey().equals(pixKey))
-                .findFirst()
-                .orElse(null);
     }
 }
