@@ -317,12 +317,12 @@ public class Main {
         } while (option != 0);
     }
     
-    public static void pixTransfer(Scanner scanner, BankAccount bankAccount) {
+    public static void pixTransfer(Scanner scanner, BankAccount senderAccount) {
         String receiverPixKey;
         BankAccount receiverAccount = null;
         
         System.out.println("\n=== Transferência via PIX ===");
-        System.out.println("Conta origem: " + Controller.getBankAccountNumber(bankAccount) + " | Saldo: R$ " + Controller.getBalance(bankAccount));
+        System.out.println("Conta origem: " + Controller.getBankAccountNumber(senderAccount) + " | Saldo: R$ " + Controller.getBalance(senderAccount));
 
         System.out.print("Digite a chave PIX do destinatário: ");
         receiverPixKey = scanner.nextLine();
@@ -331,7 +331,7 @@ public class Main {
         for (Bank bank : Controller.getBanks()) {
             for (Agency agency : Controller.getAgencies(bank)) {
                 for (BankAccount account : Controller.getBankAccountsByAgency(agency)) {
-                    if (Controller.getPixKey(bankAccount).equalsIgnoreCase(receiverPixKey)) {
+                    if (Controller.getPixKey(senderAccount).equalsIgnoreCase(receiverPixKey)) {
                         receiverAccount = account;
                         break outer;
                     }
@@ -344,7 +344,7 @@ public class Main {
             return;
         }
 
-        if (receiverAccount == bankAccount) {
+        if (receiverAccount == senderAccount) {
             System.out.println("Não é possível transferir para a mesma conta.");
             return;
         }
@@ -364,17 +364,16 @@ public class Main {
             return;
         }
 
-        if (bankAccount.getBalance().compareTo(amount) < 0) {
+        if (senderAccount.getBalance().compareTo(amount) < 0) {
             System.out.println("Saldo insuficiente.");
             return;
         }
 
-        Controller.debit(bankAccount, amount);
-        Controller.credit(receiverAccount, amount);
+        Controller.transferAmount(senderAccount, receiverAccount, amount);
 
         System.out.println("PIX enviado com sucesso!");
         
-        logPIXTransfer(bankAccount, receiverAccount, amount);
+        logPIXTransfer(senderAccount, receiverAccount, amount);
     }
     
     public static void logPIXTransfer(BankAccount sender, BankAccount receiver, BigDecimal amount) {
@@ -398,7 +397,7 @@ public class Main {
                 return;
             }
 
-            Controller.credit(bankAccount, amount);
+            Controller.deposit(bankAccount, amount);
             BigDecimal newBalance = Controller.getBalance(bankAccount);
 
             System.out.println("Depósito de R$ " + amount + " realizado com sucesso.");

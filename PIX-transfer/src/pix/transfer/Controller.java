@@ -33,14 +33,27 @@ public class Controller {
         holders.add(holder);
     }
     
-    public static void credit(BankAccount account, BigDecimal amount) {
-        BigDecimal newBalance = account.getBalance().add(amount);
-        account.setBalance(newBalance);
+    private static void credit(BankAccount account, BigDecimal amount) {
+        account.credit(amount);
     }
 
-    public static void debit(BankAccount account, BigDecimal amount) {
+    private static void debit(BankAccount account, BigDecimal amount) {
         BigDecimal newBalance = account.getBalance().subtract(amount);
         account.setBalance(newBalance);
+    }
+    
+    public static void transferAmount(BankAccount sender, BankAccount receiver, BigDecimal amount) {
+        debit(sender, amount);
+        credit(receiver, amount);
+    }
+    
+    public static void validate(BankAccount account) {
+        
+    }
+    
+    public static void deposit(BankAccount account, BigDecimal amount) {
+        validate(account);
+        credit(account, amount);
     }
     
     public static List<Holder> getHolders() {
