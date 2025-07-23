@@ -175,7 +175,7 @@ public class Main {
         List<Holder> holders = Controller.getHolders();
 
         System.out.println("=== Titulares Cadastrados ===");
-        for (int i = 0; i < Controller.getHolderSize(holders); i++) {
+        for (int i = 0; i < Controller.getHoldersSize(holders); i++) {
             holder = holders.get(i);
             System.out.println("\n[" + i + "] " + Controller.getHolderName(holder));
             System.out.println("CPF: " + Controller.getHolderCpf(holder));
@@ -219,7 +219,7 @@ public class Main {
 
     public static void removeHolder(Scanner scanner) {
         byte index;
-        String holderName;
+        Holder removedHolder;
         List<Holder> holders = Controller.getHolders();
 
         if (holders.isEmpty()) {
@@ -234,14 +234,14 @@ public class Main {
         }
 
         do {
-            System.out.print("Digite o CPF do titular para removê-lo: ");
+            System.out.print("Digite o índice do titular para removê-lo: ");
             index = scanner.nextByte();
             scanner.nextLine();
         } while (index < 0 || index >= holders.size());
 
-        holderName = holders.get(index).getName();
-        Controller.removeBank(holders.get(index));
-        System.out.println("Titular " + holderName + " removido com sucesso!");
+        removedHolder = holders.get(index);
+        Controller.removeHolder(removedHolder);
+        System.out.println("Titular " + Controller.getHolderName(removedHolder) + " removido com sucesso!");
     }
     
     public static void bankAccountsHolderMenu(Scanner scanner, Holder holder) {
@@ -280,7 +280,7 @@ public class Main {
         }
 
         System.out.println("=== Titulares Cadastrados ===");
-        for (int i = 0; i < Controller.getBankAccountSize(bankAccounts); i++) {
+        for (int i = 0; i < Controller.getBankAccountsSize(bankAccounts); i++) {
             account = bankAccounts.get(i);
             System.out.println("\n[" + i + "] " + Controller.getBankAccountNumber(account));
             System.out.println("Chave PIX: " + Controller.getPixKey(account));
@@ -290,7 +290,7 @@ public class Main {
             System.out.print("Digite o índice da conta bancária para selecioná-la: ");
             index = scanner.nextByte();
             scanner.nextLine();
-        } while (index < 0 || index >= Controller.getBankAccountSize(bankAccounts));
+        } while (index < 0 || index >= Controller.getBankAccountsSize(bankAccounts));
         
         BankAccount bankAccount = bankAccounts.get(index);
         operateBankAccountMenu(scanner, bankAccount);
@@ -348,10 +348,9 @@ public class Main {
             System.out.println("Não é possível transferir para a mesma conta.");
             return;
         }
-
-        System.out.print("Digite o valor da transferência: R$ ");
-        BigDecimal amount;
         
+        BigDecimal amount;
+        System.out.print("Digite o valor da transferência: R$ ");
         try {
             amount = new BigDecimal(scanner.nextLine());
         } catch (NumberFormatException e) {
@@ -453,7 +452,7 @@ public class Main {
         }
 
         System.out.println("\n=== Bancos Cadastrados ===");
-        for (int i = 0; i < Controller.getBankSize(banks); i++) {
+        for (int i = 0; i < Controller.getBanksSize(banks); i++) {
             bank = banks.get(i);
             System.out.println("[" + i + "] " + Controller.getBankName(bank));
         }
@@ -473,7 +472,7 @@ public class Main {
         }
 
         System.out.println("\n=== Agências do Banco " + selectedBank.getName() + " ===");
-        for (int i = 0; i < Controller.getAgencySize(agencies); i++) {
+        for (int i = 0; i < Controller.getAgenciesSize(agencies); i++) {
             agency = agencies.get(i);
             System.out.println("[" + i + "] Agência " + Controller.getAgencyNumber(agency));
         }
@@ -482,7 +481,7 @@ public class Main {
             System.out.print("Escolha o índice da agência: ");
             agencyIndex = scanner.nextByte();
             scanner.nextLine();
-        } while (agencyIndex < 0 || agencyIndex >= Controller.getAgencySize(agencies));
+        } while (agencyIndex < 0 || agencyIndex >= Controller.getAgenciesSize(agencies));
 
         Agency selectedAgency = agencies.get(agencyIndex);
 
@@ -494,24 +493,25 @@ public class Main {
 
         BankAccount newAccount = new BankAccount(accountNumber, pixKey);
 
-        selectedAgency.getBankAccounts().add(newAccount);
-        holder.getBankAccounts().add(newAccount);
+        Controller.addBankAccount(newAccount, selectedAgency, holder);
 
-        System.out.println("Conta criada com sucesso para " + holder.getName() + " na agência " + selectedAgency.getNumber() + " do banco " + selectedBank.getName());
+        System.out.println("Conta criada com sucesso para " + Controller.getHolderName(holder) + " na agência " + Controller.getAgencyNumber(selectedAgency) + " do banco " + Controller.getBankName(selectedBank));
     }
     
     public static void removeBankAccountByUser(Scanner scanner, Holder holder) {
         byte index;
-        List<BankAccount> bankAccounts = holder.getBankAccounts();
+        List<BankAccount> bankAccounts = Controller.getBankAccountsByHolder(holder);
+        BankAccount bankAccount, removedAccount;
 
-        if (bankAccounts.isEmpty()) {
+        if (Controller.bankAccountsIsEmpty(bankAccounts)) {
             System.out.println("O titular " + holder.getName() + " não possui contas cadastradas.");
             return;
         }
 
         System.out.println("\n=== Contas Bancárias de " + holder.getName() + " ===");
-        for (int i = 0; i < bankAccounts.size(); i++) {
-            System.out.println("[" + i + "] Conta: " + bankAccounts.get(i).getNumber() + " | PIX: " + bankAccounts.get(i).getPixKey());
+        for (int i = 0; i < Controller.getBankAccountsSize(bankAccounts); i++) {
+            bankAccount = bankAccounts.get(i);
+            System.out.println("[" + i + "] Conta: " + Controller.getBankAccountNumber(bankAccount) + " | PIX: " + Controller.getPixKey(bankAccount));
         }
 
         do {
@@ -519,17 +519,20 @@ public class Main {
             index = scanner.nextByte();
             scanner.nextLine();
         } while (index < 0 || index >= bankAccounts.size());
-
-        BankAccount removedAccount = bankAccounts.remove(index);
+        
+        removedAccount = bankAccounts.get(index);
 
         List<Bank> banks = Controller.getBanks();
         for (Bank bank : banks) {
-            for (Agency agency : bank.getAgencies()) {
-                agency.getBankAccounts().remove(removedAccount);
+            for (Agency agency : Controller.getAgencies(bank)) {
+                for (BankAccount ba : Controller.getBankAccountsByAgency(agency)) {
+                    if (Controller.getBankAccountNumber(ba).equals(Controller.getBankAccountNumber(removedAccount))) {
+                        Controller.removeBankAccount(ba, agency, holder);
+                        System.out.println("Conta " + Controller.getBankAccountNumber(removedAccount) + " removida com sucesso.");
+                    }
+                }
             }
         }
-
-        System.out.println("Conta " + removedAccount.getNumber() + " removida com sucesso.");
     }
     
     public static void banksMenu(Scanner scanner) {
@@ -735,9 +738,7 @@ public class Main {
 
         do {
             System.out.println("\n=== Menu Contas Bancárias da Agência " + agency.getNumber() + " ===");
-            System.out.println("[1] Ver conta bancária");
-            System.out.println("[2] Adicionar conta bancária");
-            System.out.println("[3] Remover conta bancária");
+            System.out.println("[1] Ver contas bancárias");
             System.out.println("[0] Voltar");
 
             option = scanner.nextByte();
@@ -745,8 +746,6 @@ public class Main {
 
             switch (option) {
                 case 1 -> viewBankAccountByAgency(scanner, agency);
-                case 2 -> addBankAccount(scanner, agency);
-                case 3 -> removeBankAccount(scanner, agency);
                 case 0 -> System.out.println("Voltando ao menu de agências...");
                 default -> System.out.println("Operação [" + option + "] inválida.");
             }
@@ -754,85 +753,21 @@ public class Main {
     }
     
     public static void viewBankAccountByAgency(Scanner scanner, Agency agency) {
-        List<BankAccount> accounts = agency.getBankAccounts();
+        List<BankAccount> accounts = Controller.getBankAccountsByAgency(agency);
         Bank bank = Controller.getBankByAgency(agency);
 
         System.out.println("\n=== Contas Bancárias da Agência " + agency.getNumber() + " ===");
 
-        if (accounts.isEmpty()) {
+        if (Controller.bankAccountsIsEmpty(accounts)) {
             System.out.println("Esta agência não possui contas bancárias cadastradas.");
             return;
         }
 
         for (BankAccount account : accounts) {
-            System.out.println("\nConta nº: " + account.getNumber());
-            System.out.println("Saldo: R$ " + account.getBalance());
-            System.out.println("Chave PIX: " + account.getPixKey());
-            System.out.println("Banco: " + (bank != null ? bank.getName() : "Desconhecido"));
+            System.out.println("\nNº da conta: " + Controller.getBankAccountNumber(account));
+            System.out.println("Saldo: R$ " + Controller.getBalance(account));
+            System.out.println("Chave PIX: " + Controller.getPixKey(account));
+            System.out.println("Banco: " + Controller.getBankName(bank));
         }
-    }
-
-    public static void addBankAccount(Scanner scanner, Agency agency) {
-        boolean exists;
-        String bankAccountNumber, pixKey;
-        List<BankAccount> bankAccounts = Controller.getBankAccountsByAgency(agency);
-        
-        do {
-            System.out.print("Digite o número da conta bancária para adicioná-la: ");
-            bankAccountNumber = scanner.nextLine();
-
-            exists = false;
-            for (BankAccount ba : bankAccounts) {
-                if (ba.getNumber().equalsIgnoreCase(bankAccountNumber)) {
-                    exists = true;
-                    System.out.println("A conta bancária " + bankAccountNumber + " já está cadastrada. Por favor, digite outro número.");
-                    break;
-                }
-            }
-        } while (exists);
-        
-        do {
-            System.out.print("Digite a chave PIX da conta bancária: ");
-            pixKey = scanner.nextLine();
-
-            exists = false;
-            for (BankAccount ba : bankAccounts) {
-                if (ba.getNumber().equalsIgnoreCase(pixKey)) {
-                    exists = true;
-                    System.out.println("A chave PIX " + pixKey + " já está cadastrada. Por favor, digite outra chave PIX.");
-                    break;
-                }
-            }
-        } while (exists);
-
-        BankAccount bankAccount = new BankAccount(bankAccountNumber, pixKey);
-        Controller.addBankAccount(bankAccount, agency);
-        System.out.println("Conta bancária " + bankAccountNumber + " adicionada com sucesso!");
-    }
-
-    public static void removeBankAccount(Scanner scanner, Agency agency) {
-        byte index;
-        String bankAccountNumber;
-        List<BankAccount> bankAccounts = Controller.getBankAccountsByAgency(agency);
-
-        if (bankAccounts.isEmpty()) {
-            System.out.println("Nenhuma conta bancária cadastrada na agência " + agency.getNumber() + ".");
-            return;
-        }
-
-        System.out.println("=== Contas Bancárias Cadastradas ===");
-        for (int i = 0; i < bankAccounts.size(); i++) {
-            System.out.println("[" + i + "] " + bankAccounts.get(i).getNumber());
-        }
-
-        do {
-            System.out.print("Digite o número da conta bancária para removê-la: ");
-            index = scanner.nextByte();
-            scanner.nextLine();
-        } while (index < 0 || index >= bankAccounts.size());
-
-        bankAccountNumber = bankAccounts.get(index).getNumber();
-        Controller.removeBankAccount(bankAccounts.get(index), agency);
-        System.out.println("Conta bancária " + bankAccountNumber + " removida com sucesso!");
     }
 }

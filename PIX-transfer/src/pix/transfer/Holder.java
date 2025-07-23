@@ -52,11 +52,11 @@ public class Holder {
         return bankAccounts;
     }
 
-    public void addAgency(BankAccount bankAccount) {
+    public void addBankAccount(BankAccount bankAccount) {
         bankAccounts.add(bankAccount);
     }
 
-    public void removeAgency(BankAccount bankAccount) {
+    public void removeBankAccount(BankAccount bankAccount) {
         bankAccounts.remove(bankAccount);
     }
 }

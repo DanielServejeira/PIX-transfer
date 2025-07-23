@@ -34,11 +34,4 @@ public class Agency {
     public void removeAccount(BankAccount account) {
         bankAccounts.remove(account);
     }
-
-    public BankAccount findByPixKey(String pixKey) {
-        return bankAccounts.stream()
-                .filter(acc -> acc.getPixKey().equals(pixKey))
-                .findFirst()
-                .orElse(null);
-    }
 }

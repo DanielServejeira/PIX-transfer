@@ -40,12 +40,10 @@ public class BankAccount {
         this.pixKey = pixKey;
     }
     
-    public boolean debit(BigDecimal amount) {
+    public void debit(BigDecimal amount) {
         if (balance.compareTo(amount) >= 0) {
             balance = balance.subtract(amount);
-            return true;
         }
-        return false;
     }
     
     public void credit(BigDecimal amount) {

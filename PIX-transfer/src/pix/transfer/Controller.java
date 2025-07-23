@@ -38,17 +38,18 @@ public class Controller {
     }
 
     private static void debit(BankAccount account, BigDecimal amount) {
-        BigDecimal newBalance = account.getBalance().subtract(amount);
-        account.setBalance(newBalance);
+        account.debit(amount);
+    }
+    
+    private static void validate(BankAccount account) {
+        
     }
     
     public static void transferAmount(BankAccount sender, BankAccount receiver, BigDecimal amount) {
+        //validar requisitos
+        //validar contas?
         debit(sender, amount);
         credit(receiver, amount);
-    }
-    
-    public static void validate(BankAccount account) {
-        
     }
     
     public static void deposit(BankAccount account, BigDecimal amount) {
@@ -101,19 +102,21 @@ public class Controller {
         bank.removeAgency(agency);
     }
     
-    public static void addBankAccount(BankAccount bankAccount, Agency agency) {
+    public static void addBankAccount(BankAccount bankAccount, Agency agency, Holder holder) {
         agency.addAccount(bankAccount);
+        holder.addBankAccount(bankAccount);
     }
 
-    public static void removeBankAccount(BankAccount bankAccount, Agency agency) {
+    public static void removeBankAccount(BankAccount bankAccount, Agency agency, Holder holder) {
         agency.removeAccount(bankAccount);
+        holder.removeBankAccount(bankAccount);
     }
     
     public static void addHolder(Holder holder) {
         holders.add(holder);
     }
     
-    public static void removeBank(Holder holder) {
+    public static void removeHolder(Holder holder) {
         holders.remove(holder);
     }
     
@@ -157,19 +160,19 @@ public class Controller {
         return agency.getNumber();
     }
     
-    public static int getBankAccountSize(List bankAccounts) {
+    public static int getBankAccountsSize(List bankAccounts) {
         return bankAccounts.size();
     }
     
-    public static int getBankSize(List banks) {
+    public static int getBanksSize(List banks) {
         return banks.size();
     }
     
-    public static int getAgencySize(List agencies) {
+    public static int getAgenciesSize(List agencies) {
         return agencies.size();
     }
     
-    public static int getHolderSize(List holders) {
+    public static int getHoldersSize(List holders) {
         return holders.size();
     }
 }
