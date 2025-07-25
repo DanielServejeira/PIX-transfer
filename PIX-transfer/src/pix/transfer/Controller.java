@@ -14,6 +14,7 @@ import java.time.LocalDate;
 public class Controller {
     private final static ArrayList<Holder> holders = new ArrayList<>();
     private final static ArrayList<Bank> banks = new ArrayList<>();
+    private final static Map<String, BankAccount> pixMap = new HashMap<>();
     
     public static void initialize() {
         Bank bank = new Bank("Banco do Brasil");
@@ -46,7 +47,6 @@ public class Controller {
     }
     
     public static void transferAmount(BankAccount sender, BankAccount receiver, BigDecimal amount) {
-        //validar requisitos
         //validar contas?
         debit(sender, amount);
         credit(receiver, amount);
@@ -66,7 +66,7 @@ public class Controller {
     }
     
     public static Bank getBankByAgency(Agency agency) {
-        for (Bank bank : banks) {
+        for (Bank bank : banks) { ///////////////////?????????????????????
             if (bank.getAgencies().contains(agency)) {
                 return bank;
             }
@@ -174,5 +174,24 @@ public class Controller {
     
     public static int getHoldersSize(List holders) {
         return holders.size();
+    }
+    
+    public static boolean holdersIsEmpty(List holders) {
+        return holders.isEmpty();
+    }
+    
+    public static void addPixKey(String pixKey, BankAccount account) {
+        pixMap.put(pixKey, account);
+    }
+    
+    public static void removePixKey(BankAccount account, String pixKey) {
+        if (pixKey.equals(account.getPixKey()) && pixMap.containsKey(pixKey)) {
+            pixMap.remove(pixKey);
+            account.setPixKey(null);
+        }
+    }
+    
+    public static BankAccount getAccountByPixKey(String pixKey) {
+        return pixMap.get(pixKey);
     }
 }
