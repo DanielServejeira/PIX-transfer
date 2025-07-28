@@ -6,6 +6,7 @@ package pix.transfer;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -48,7 +49,7 @@ public class Holder {
         this.cpf = cpf;
     }
 
-    public ArrayList<BankAccount> getBankAccounts() {
+    public List<BankAccount> getBankAccounts() {
         return bankAccounts;
     }
 
@@ -58,5 +59,13 @@ public class Holder {
 
     public void removeBankAccount(BankAccount bankAccount) {
         bankAccounts.remove(bankAccount);
+    }
+    
+    public BankAccount getBankAccountByIndex(int index) {
+        List<BankAccount> accounts = getBankAccounts();
+        if (index >= 0 && index < accounts.size()) {
+            return accounts.get(index);
+        }
+        return null;
     }
 }

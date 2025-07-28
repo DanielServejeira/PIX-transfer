@@ -12,26 +12,32 @@ import java.time.LocalDate;
  * @author Daniel Servejeira
  */
 public class Controller {
-    private final static ArrayList<Holder> holders = new ArrayList<>();
-    private final static ArrayList<Bank> banks = new ArrayList<>();
+    private final static HolderCatalog holderCatalog = new HolderCatalog();
+    private final static AgencyCatalog agencyCatalog = new AgencyCatalog();
+    
     private final static Map<String, BankAccount> pixMap = new HashMap<>();
     
     public static void initialize() {
-        Bank bank = new Bank("Banco do Brasil");
+        Controller.addAgency("0001");
+        Controller.addAgency("0002");
 
-        Agency agency = new Agency("0001");
+        Controller.addHolder("12345678900", "Mariana", LocalDate.of(2001, 5, 20));
+        Controller.addHolder("98765432100", "Bruno Souza", LocalDate.of(1985, 8, 15));
 
-        Holder holder = new Holder("12345678900", "João da Silva", LocalDate.of(1990, 5, 22));
+        Agency agency1 = Controller.getAgencyByIndex(0);
+        Agency agency2 = Controller.getAgencyByIndex(1);
 
-        BankAccount bankAccount = new BankAccount("10001", "joao@mail.com");
+        Holder holder1 = Controller.getHolderByCpf("12345678900");
+        Holder holder2 = Controller.getHolderByCpf("98765432100");
 
-        agency.getBankAccounts().add(bankAccount);
-        holder.getBankAccounts().add(bankAccount);
+        BankAccount acc1 = new BankAccount("1001-4", "mariana@mail.com", holder1, agency1);
+        BankAccount acc2 = new BankAccount("1002-1", "bruno@gmail.com", holder2, agency2);
 
-        bank.getAgencies().add(agency);
+        holder1.addBankAccount(acc1);
+        holder2.addBankAccount(acc2);
 
-        banks.add(bank);
-        holders.add(holder);
+        agency1.addBankAccount(acc1);
+        agency2.addBankAccount(acc2);
     }
     
     private static void credit(BankAccount account, BigDecimal amount) {
@@ -42,82 +48,68 @@ public class Controller {
         account.debit(amount);
     }
     
-    private static void validate(BankAccount account) {
+    private static void validate() {
         
     }
     
     public static void transferAmount(BankAccount sender, BankAccount receiver, BigDecimal amount) {
-        //validar contas?
+        validate();
         debit(sender, amount);
         credit(receiver, amount);
     }
     
     public static void deposit(BankAccount account, BigDecimal amount) {
-        validate(account);
+        validate();
         credit(account, amount);
+        //log
     }
     
     public static List<Holder> getHolders() {
-        return holders;
+        return new ArrayList<>(holderCatalog.getAllHolders());
     }
     
-    public static List<Bank> getBanks() {
-        return banks;
+    public static List<Agency> getAgencies() {
+        return new ArrayList<>(agencyCatalog.getAllAgencies());
     }
     
-    public static Bank getBankByAgency(Agency agency) {
-        for (Bank bank : banks) { ///////////////////?????????????????????
-            if (bank.getAgencies().contains(agency)) {
-                return bank;
-            }
-        }
-        return null;
-    }
-    
-    public static List<Agency> getAgencies(Bank bank) {
-        return bank.getAgencies();
-    }
-    
-    public static List<BankAccount> getBankAccountsByAgency(Agency agency) {
-        return agency.getBankAccounts();
+    public static List<BankAccount> getBankAccountsByAgency(String agencyNumber) {
+        return agencyCatalog.getAgency(agencyNumber).getBankAccounts();
     }
     
     public static List<BankAccount> getBankAccountsByHolder(Holder holder) {
         return holder.getBankAccounts();
     }
     
-    public static void addBank(Bank bank) {
-        banks.add(bank);
+    public static void addAgency(String agencyNumber) {
+        Agency agency = new Agency(agencyNumber);
+        agencyCatalog.registerAgency(agency);
     }
 
-    public static void removeBank(Bank bank) {
-        banks.remove(bank);
+    public static void removeAgency(String agencyNumber) {
+        agencyCatalog.removeAgency(agencyNumber);
     }
     
-    public static void addAgency(Agency agency, Bank bank) {
-        bank.addAgency(agency);
-    }
-
-    public static void removeAgency(Agency agency, Bank bank) {
-        bank.removeAgency(agency);
-    }
-    
-    public static void addBankAccount(BankAccount bankAccount, Agency agency, Holder holder) {
-        agency.addAccount(bankAccount);
+    public static void addBankAccount(String accountNumber, String pixKey, Agency agency, Holder holder) {
+        BankAccount bankAccount = new BankAccount(accountNumber, pixKey, holder, agency);
+        
+        agency.addBankAccount(bankAccount);
         holder.addBankAccount(bankAccount);
+        
+        addPixKey(pixKey, bankAccount);
     }
 
     public static void removeBankAccount(BankAccount bankAccount, Agency agency, Holder holder) {
-        agency.removeAccount(bankAccount);
+        agency.removeBankAccount(bankAccount);
         holder.removeBankAccount(bankAccount);
     }
     
-    public static void addHolder(Holder holder) {
-        holders.add(holder);
+    public static void addHolder(String cpf, String name, LocalDate birthDate) {
+        Holder holder = new Holder(cpf, name, birthDate);
+        holderCatalog.registerHolder(holder);
     }
     
-    public static void removeHolder(Holder holder) {
-        holders.remove(holder);
+    public static void removeHolder(String cpf) {
+        holderCatalog.removeHolder(cpf);
     }
     
     public static BigDecimal getBalance(BankAccount bankAccount) {
@@ -128,12 +120,27 @@ public class Controller {
         return bankAccount.getPixKey();
     }
     
-    public static String getBankAccountNumber(BankAccount bankAccount) {
-        return bankAccount.getNumber();
+    public static BankAccount getBankAccountByHolderAndNumber(Holder holder, String accountNumber) {
+        for (BankAccount account : holder.getBankAccounts()) {
+            if (account.getNumber().equals(accountNumber)) {
+                return account;
+            }
+        }
+        return null;
+    }
+    
+    public static String getHolderNameByIndex(int index) {
+        Holder holder = holderCatalog.getHolderByIndex(index);
+        return holder != null ? holder.getName() : "Desconhecido";
     }
     
     public static String getHolderName(Holder holder) {
         return holder.getName();
+    }
+    
+    public static String getHolderCpfByIndex(int index) {
+        Holder holder = holderCatalog.getHolderByIndex(index);
+        return holder != null ? holder.getCpf() : "Desconhecido";
     }
     
     public static String getHolderCpf(Holder holder) {
@@ -143,17 +150,9 @@ public class Controller {
     public static boolean bankAccountsIsEmpty(List bankAccounts) {
         return bankAccounts.isEmpty();
     }
-    
-    public static boolean banksIsEmpty(List banks) {
-        return banks.isEmpty();
-    }
-    
-    public static boolean agenciesIsEmpty(List agencies) {
-        return agencies.isEmpty();
-    }
-    
-    public static String getBankName(Bank bank) {
-        return bank.getName();
+        
+    public static boolean agenciesIsEmpty() {
+        return agencyCatalog.getAllAgencies().isEmpty();
     }
     
     public static String getAgencyNumber(Agency agency) {
@@ -164,24 +163,20 @@ public class Controller {
         return bankAccounts.size();
     }
     
-    public static int getBanksSize(List banks) {
-        return banks.size();
+    public static int getAgenciesSize() {
+        return agencyCatalog.getAllAgencies().size();
     }
     
-    public static int getAgenciesSize(List agencies) {
-        return agencies.size();
+    public static int getHoldersSize() {
+        return holderCatalog.getSize();
     }
     
-    public static int getHoldersSize(List holders) {
-        return holders.size();
+    public static boolean holdersIsEmpty() {
+        return holderCatalog.getAllHolders().isEmpty();
     }
     
-    public static boolean holdersIsEmpty(List holders) {
-        return holders.isEmpty();
-    }
-    
-    public static void addPixKey(String pixKey, BankAccount account) {
-        pixMap.put(pixKey, account);
+    public static void addPixKey(String pixKey, BankAccount bankAccount) {
+        pixMap.put(pixKey, bankAccount);
     }
     
     public static void removePixKey(BankAccount account, String pixKey) {
@@ -193,5 +188,53 @@ public class Controller {
     
     public static BankAccount getAccountByPixKey(String pixKey) {
         return pixMap.get(pixKey);
+    }
+    
+    public static String getAgencyNumberByIndex(int index) {
+        Agency a = agencyCatalog.getAgencyByIndex(index);
+        return a != null ? a.getNumber() : null;
+    }
+    
+    public static String getBankAccountNumberByHolderAndIndex(Holder holder, int index) {
+        BankAccount ba = holder.getBankAccountByIndex(index);
+        return ba != null ? ba.getNumber() : null;
+    }
+    
+    public static String getBankAccountPixKeyByHolderAndIndex(Holder holder, int index) {
+        BankAccount ba = holder.getBankAccountByIndex(index);
+        return ba != null ? ba.getPixKey() : null;
+    }
+    
+    public static String getBankAccountNumber(BankAccount bankAccount) {
+        return bankAccount != null ? bankAccount.getNumber() : null;
+    }
+    
+    public static void logTransfer(BankAccount sender, BankAccount receiver, BigDecimal amount) {
+        sender.logTransfer("send", receiver, amount);
+        receiver.logTransfer("receive", sender, amount);
+    }
+    
+    public static List<String> getLogTransfer(BankAccount bankAccount) {
+        return bankAccount.getTransferLog();
+    }
+    
+    public static String getAgencyNumberByBankAccount(BankAccount bankAccount) {
+        return bankAccount.getAgency().getNumber();
+    }
+    
+    public static Agency getAgency(String agencyNumber) {
+        return agencyCatalog.getAgency(agencyNumber);
+    }
+    
+    public static Agency getAgencyByBankAccount(BankAccount bankAccount) {
+        return bankAccount.getAgency();
+    }
+    
+    public static Holder getHolderByCpf(String cpf) {
+        return holderCatalog.getHolder(cpf);
+    }
+
+    public static Agency getAgencyByIndex(int index) {
+        return agencyCatalog.getAgencyByIndex(index);
     }
 }

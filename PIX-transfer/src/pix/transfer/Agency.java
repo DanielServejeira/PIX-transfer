@@ -27,11 +27,11 @@ public class Agency {
         return bankAccounts;
     }
     
-    public void addAccount(BankAccount account) {
+    public void addBankAccount(BankAccount account) {
         bankAccounts.add(account);
     }
     
-    public void removeAccount(BankAccount account) {
+    public void removeBankAccount(BankAccount account) {
         bankAccounts.remove(account);
     }
 }
